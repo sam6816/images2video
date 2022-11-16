@@ -3,11 +3,11 @@
 # Host and path(s)
 h=eumetview.eumetsat.int
 p=static-images/MSG/RGB/AIRMASS/
-p+=FULLDISC  
-#FULLRESOLUTION is 3000x3000 (vs. 800x800) but hardly a difference at scaled-down size; takes long unscaled 
+#p+=FULLDISC  # 800px square
+p+=FULLRESOLUTION # 3712px square
 
 # Japanese: https://www.data.jma.go.jp/mscweb/data/himawari/list_fd_.html
-# I only find one day/24 with 10min intervals...
+# I only find one 24h with 10min intervals...
 
 # Default filenames
 index=eumetindex.html
@@ -47,31 +47,34 @@ curl-eu() {
     curl https://$h/$p/ -o $out 
 }
 
-# curl keeps file order, wget not! wget has -i/-B options, curl wants comma sep. list
+# curl keeps file order when piping, wget not! wget has nice i/B options, curl wants csv 
 # tac for ascending chronology (old at top)
-imagepipe() {
-
-    curl-images $1 "pipe"  |
-    ffmpeg -f image2pipe -i - -pix_fmt yuv444p -y $2
-}
-
-# into pipe or a dir with original names
-curl-images() {
-    
+# either into pipe (no args, for ffmpeg) or manually into a dir, with original names, which on eumetsat are random 
+download-images() {
+     
     local csv=$(tac $1 | paste -sd,)
-    local out
+    local outargs
     if [[ $2 == "pipe" ]]
     then 
-       out=""
+       outargs=""
     else 
-       out="-O --output-dir $2"
+       outargs="-O --output-dir $2"
     fi        
-    local pimag=IMAGESDisplay
+    local pimag="IMAGESDisplay"
 
     # quote braces, but not $out (several args!)!
-    curl https://$h/$p/$pimag/"{$csv}" $out  
+
+    curl https://$h/$p/$pimag/"{$csv}" $outargs  
 }
 
+# Combine download from a list and ffmpeg
+imagepipe() {
+    
+    download-images $1 "pipe"  |
+    ffmpeg -f image2pipe -i - -pix_fmt yuv420p -s 1080x1080 -c hevc -y $2
+}
+
+# no transcoding needed, then just copy
 ffconcat() {
     ffmpeg -f concat -i $1 -c:v copy newconcat.mp4
 }
