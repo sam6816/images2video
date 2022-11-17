@@ -19,7 +19,7 @@ There is low- and hi-res, 800 vs. 3712 pixels square. I used hi-res for the
 maybe 500x500, good if you want to keep the mp4 small. 
 
 
-### ffmpeg options
+#### ffmpeg options
 
 With the hi-res, the `-s` option in ffmpeg is important; otherwise it will try/make a 
 3712x3712 video. 
@@ -31,6 +31,12 @@ I also left the `-c hevc` because the mp4 is almost half the size than with h264
 Firefox says "corrupt", but for ffplay and youtube it is OK.
 
 
+### The Core Pipe
+
+
+`curl "https://$h/$p{D,E,F,G,H,...}" | ffmpeg -f image2pipe -i - out.mp4`
+
+With D-H being the date-selected image names. 
 
 
 

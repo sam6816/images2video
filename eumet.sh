@@ -46,12 +46,13 @@ sed_eumet() {
 }
 # curl keeps file order when piping, wget not! wget has nice i/B options, curl wants csv 
 # tac for ascending chronology (old at top)
-# either into pipe or into a dir, with original names, which on eumetsat are random (but in the right order)
+# either into pipe or into a dir, with original names, which on eumetsat are random 
 # IMAGESDisplay is hardcoded, and $h and $p are global
 multicurl() {
-    local csv=$(tac $1 | paste -sd,) dir=$2 
+    local csv=$(tac $1 | paste -sd,) 
+    local dir=$2 
     if [[ -n $dir ]]
-        then dir="-O --output-dir $2"
+        then dir="-O --output-dir $dir"
     fi
     curl https://$h/$p/IMAGESDisplay/"{$csv}" $dir  
 }
